@@ -1,4 +1,4 @@
-CXXFLAGS = -O3 -g -std=c++11 #-fopenmp
+CXXFLAGS = -O3 -g -std=c++11 -fopenmp
 LFLAGS =
 LIBS =
 
