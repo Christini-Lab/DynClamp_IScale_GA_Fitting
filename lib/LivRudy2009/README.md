@@ -1,5 +1,3 @@
-# Livshitz Rudy 2009 Model - Dynamic Clamp Optimized
----
 
 ### Introduction
 This version of the Livshitz Rudy 2009 guinea pig ventricular model has been
@@ -26,10 +24,11 @@ git remote add -f LivR2009_remote https://pbtech-vc.med.cornell.edu/git/fro2002/
 Add genetic algorithm as a subtree of the project.
   * **--prefix LivRudy2009/** - prefix denotes the directory you wish to
   put the model in, you can change this
+  * **LivR2009_remote** - Model remote repository set earlier
   * **--squash** - merges all commits into one for cleaner history
 
 ```sh
-git subtree add --prefix LivRudy2009/ https://pbtech-vc.med.cornell.edu/git/fro2002/dynclamp_livr2009_model.git master --squash
+git subtree add --prefix LivRudy2009/ LivR2009_remote master --squash
 ```
 
 ### Updating the Genetic_Algorithm subtree:
