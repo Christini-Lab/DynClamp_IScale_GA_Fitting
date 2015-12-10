@@ -12,9 +12,9 @@ sim.100.data  <- t(read.table("Voltage_100kHz.dat"))
 # within RTXI
 obj.data <- t(read.table("../../objectives/Objective_Cell_15.dat"))
 
-dt <- 0.01
+dt <- 0.1
 # Extract simulation data
-# 100 kHz
+# 100 kHz model integration, data is downsampled to 10kHz
 tmp.input <- sim.100.data[,1]
 Sim.100.Pace <- data.frame(
   Category = "100 kHz Simulation",
@@ -223,5 +223,5 @@ p <- ggplot(Obj.Pace, aes(time, value, color = Category)) +
 print(p)
 
 # Calculate error
-pace.error <- sum(abs(Obj.Pace$value - Sim.Pace$value)^2)
-pace.error.max <- max(abs(Obj.Pace$value - Sim.Pace$value))
+error.100kHz <- sum(abs(Obj.Pace$value - Sim.100.Pace$value))
+error.10kHz <-  sum(abs(Obj.Pace$value - Sim.10.Pace$value))

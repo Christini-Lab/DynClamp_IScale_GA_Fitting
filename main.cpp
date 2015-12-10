@@ -35,20 +35,20 @@ void globalEvaluate(double *parameter, double *error,
   }
 
   // Scale model parameters
-  model.setGKr(model.getGKr() * parameter[0]);
-  model.setGKs(model.getGKs() * parameter[1]);
-  model.setGCaL(model.getGCaL() * parameter[2]);
-  model.setGK1(model.getGK1() * parameter[3]);
-  model.setGCaT(model.getGCaT() * parameter[4]);
-  model.setGNaK(model.getGNaK() * parameter[5]);
-  model.setGNa(model.getGNa() * parameter[6]);
-  model.setGKp(model.getGKp() * parameter[7]);
-  model.setGpCa(model.getGpCa() * parameter[8]);
-  model.setGserca(model.getGserca() * parameter[9]);
-  model.setGNCX(model.getGNCX() * parameter[10]);
+  // model.setGKr(model.getGKr() * parameter[0]);
+  // model.setGKs(model.getGKs() * parameter[1]);
+  // model.setGCaL(model.getGCaL() * parameter[2]);
+  // model.setGK1(model.getGK1() * parameter[3]);
+  // model.setGCaT(model.getGCaT() * parameter[4]);
+  // model.setGNaK(model.getGNaK() * parameter[5]);
+  // model.setGNa(model.getGNa() * parameter[6]);
+  // model.setGKp(model.getGKp() * parameter[7]);
+  // model.setGpCa(model.getGpCa() * parameter[8]);
+  // model.setGserca(model.getGserca() * parameter[9]);
+  // model.setGNCX(model.getGNCX() * parameter[10]);
 
   // Data is acquired at 10 kHz
-  double dt = 0.01;
+  double dt = 0.1;
   model.setDt(dt);
   int steps = 0.1 / dt;
 
@@ -117,38 +117,38 @@ void globalEvaluate(double *parameter, double *error,
       }
     }
 
+    // Divide by number of beats for average
+    std::transform(vmData.begin(), vmData.end(), vmData.begin(),
+                   [=] (double sumVm) {
+                     return sumVm / numPerturbBeats;
+                   });
+
+    // Calculate difference between average voltage and objective and
+    // save to vmDiff vector.
+    std::transform(vmData.begin(), vmData.end(),
+                   objectives.at(i).begin(),
+                   vmDiff.at(i).begin(),
+                   [] (double modelVm, double objectiveVm) {
+                     return std::abs(modelVm - objectiveVm);
+                   });
+  }
     // If model crashed, set error to arbitrarily high value
     if (!model.getStatus()) {
       error[0] = 200 * 5000 * 8;
     }
     else { // Perform normal error calculation
-      // Divide by number of beats for average
-      std::transform(vmData.begin(), vmData.end(), vmData.begin(),
-                     [=] (double sumVm) {
-                       return sumVm / numPerturbBeats;
-                     });
-      // Calculate difference between average voltage and objective and
-      // save to vmDiff vector.
-      std::transform(vmData.begin(), vmData.end(),
-                     objectives.at(i).begin(),
-                     vmDiff.at(i).begin(),
-                     [] (double modelVm, double objectiveVm) {
-                       return std::abs(modelVm - objectiveVm);
-                     });
+      // Calculate total error
+      double totalError = 0;
+      std::for_each(vmDiff.begin(), vmDiff.end(),
+                    // Summate differences between simulation and objective
+                    // and add to total error
+                    [&totalError] (std::vector<double> simVsObj) {
+                      totalError += std::accumulate(simVsObj.begin(),
+                                                    simVsObj.end(),
+                                                    0.0);
+                    });
+      error[0] = totalError;
     }
-    // Calculate total error
-    double totalError = 0;
-    std::for_each(vmDiff.begin(), vmDiff.end(),
-                  // Summate differences between simulation and objective
-                  // and add to total error
-                  [&totalError] (std::vector<double> simVsObj) {
-                    totalError += std::accumulate(simVsObj.begin(),
-                                                  simVsObj.end(),
-                                                  0.0);
-                  });
-
-    error[0] = totalError;
-  }
 
 #pragma omp ordered
   {
@@ -212,8 +212,12 @@ int main(int argc, char *argv[]) {
   // Double check protocol and objective matrixes match desired dimensions
   // Protocol should have one extra row, since it contains membrane capacitance
   if (protocolTraces.size() - 1 != objectiveTraces.size()) {
-    std::cout << "Error: Protocol and objective sizes do not match" <<
-        std::endl;
+    std::cout <<
+        "Error: Protocol and objective sizes do not match" << std::endl <<
+        "Protocol size - 1: " << protocolTraces.size() - 1 << std::endl <<
+        "Protocol file: " << argv[1] << std::endl <<
+        "Objective size: " << objectiveTraces.size() << std::endl <<
+        "Objective file: " << argv[2] << std::endl;
     exit(0);
   }
   run_GA(argv[3]);

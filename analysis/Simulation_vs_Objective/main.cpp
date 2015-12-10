@@ -82,9 +82,8 @@ int main(int argc, char *argv[]) {
   double cm = protocols.back().at(0) * 1e-12;
   protocols.resize(protocols.size() - 1); // Remove cm once extracted
 
-  // Vector for voltage differences between simulation and objective
   std::vector< std::vector<double> >
-      vmDiff(protocols.size(),
+      runData(protocols.size(),
              std::vector<double>(protocols.at(0).size()));
 
   // Static pacing, using static pacing current
