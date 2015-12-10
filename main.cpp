@@ -35,17 +35,17 @@ void globalEvaluate(double *parameter, double *error,
   }
 
   // Scale model parameters
-  // model.setGKr(model.getGKr() * parameter[0]);
-  // model.setGKs(model.getGKs() * parameter[1]);
-  // model.setGCaL(model.getGCaL() * parameter[2]);
-  // model.setGK1(model.getGK1() * parameter[3]);
-  // model.setGCaT(model.getGCaT() * parameter[4]);
-  // model.setGNaK(model.getGNaK() * parameter[5]);
-  // model.setGNa(model.getGNa() * parameter[6]);
-  // model.setGKp(model.getGKp() * parameter[7]);
-  // model.setGpCa(model.getGpCa() * parameter[8]);
-  // model.setGserca(model.getGserca() * parameter[9]);
-  // model.setGNCX(model.getGNCX() * parameter[10]);
+  model.setGKr(model.getGKr() * parameter[0]);
+  model.setGKs(model.getGKs() * parameter[1]);
+  model.setGCaL(model.getGCaL() * parameter[2]);
+  model.setGK1(model.getGK1() * parameter[3]);
+  model.setGCaT(model.getGCaT() * parameter[4]);
+  model.setGNaK(model.getGNaK() * parameter[5]);
+  model.setGNa(model.getGNa() * parameter[6]);
+  model.setGKp(model.getGKp() * parameter[7]);
+  model.setGpCa(model.getGpCa() * parameter[8]);
+  model.setGserca(model.getGserca() * parameter[9]);
+  model.setGNCX(model.getGNCX() * parameter[10]);
 
   // Data is acquired at 10 kHz
   double dt = 0.1;

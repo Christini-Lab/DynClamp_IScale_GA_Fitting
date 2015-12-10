@@ -10,7 +10,7 @@ sim.100.data  <- t(read.table("Voltage_100kHz.dat"))
 
 # Voltage data from full dynamic clamp experiment done on the LivR2009 model
 # within RTXI
-obj.data <- t(read.table("../../objectives/Objective_Cell_15.dat"))
+obj.data <- t(read.table("../../objectives/Objective_DynClamp_Simulation.dat"))
 
 dt <- 0.1
 # Extract simulation data

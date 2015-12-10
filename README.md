@@ -33,8 +33,19 @@ perturbation. The files are organized by row:
   7. INaK - membrane voltage response
   8. INCX - membrane voltage response
 
+
 ### Libraries
 A genetic algorithm and the Livshitz Rudy 2009 model used in the dynamic clamp
 experiments have been added to this repository as subtrees. If you wish to
 update the libraries, you must first add the remote repository and merge in any
 new changes.
+
+
+### Example command
+The follow command will run a simulation fitting the model to itself. The
+objective data was from a 10kHz simulation created by the program located
+in analysis/Simulation_vs_Objective.
+
+```sh
+make && ./GA_Fitting objectives/Objective_GA_Protocol_Simulation.dat protocols/Protocol_DynClamp_Simulation.dat settings.ga
+```
