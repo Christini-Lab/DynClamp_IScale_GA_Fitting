@@ -33,7 +33,7 @@
   the use of chrono library, which requires code to be compiled using the
   C++11 standard.
 */
-// #define TIMESTAMP
+#define TIMESTAMP
 
 #ifdef TIMESTAMP
 #include <chrono>

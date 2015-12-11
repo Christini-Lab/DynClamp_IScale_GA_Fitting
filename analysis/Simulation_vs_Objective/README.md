@@ -17,3 +17,8 @@ was done using a model running at a 100kHz, the 10kHz model had a lower error
 
 ### Notes
   * The 10kHz simulation is saved as an objective.
+  * The R plotting script can be run within an IDE or through the command line
+    using Rscript
+    ```sh
+    Rscript Plot_Comparison.R
+    ```

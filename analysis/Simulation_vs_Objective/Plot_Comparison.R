@@ -1,7 +1,13 @@
 # Requires ggplot2 and ggthemes
 library('ggplot2')
 library('ggthemes')
-setwd(dirname(sys.frame(1)$ofile)) # Set working directory to script location
+
+if (interactive()) { # Check if script is being run in a GUI or as RScript
+  setwd(dirname(sys.frame(1)$ofile)) # Set working directory to script location
+} else {
+  # Start X11
+  X11()
+}
 
 # Voltage data of LivR2009 model simulation using genetic algorithm evaluation
 # protocol
@@ -225,3 +231,8 @@ print(p)
 # Calculate error
 error.100kHz <- sum(abs(Obj.Pace$value - Sim.100.Pace$value))
 error.10kHz <-  sum(abs(Obj.Pace$value - Sim.10.Pace$value))
+
+if (!interactive()) { # Keeps plot open if being run as Rscript
+  message("Press Return To Continue")
+  invisible(readLines("stdin", n=1))
+}

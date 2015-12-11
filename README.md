@@ -41,11 +41,23 @@ update the libraries, you must first add the remote repository and merge in any
 new changes.
 
 
-### Example command
-The follow command will run a simulation fitting the model to itself. The
-objective data was from a 10kHz simulation created by the program located
-in analysis/Simulation_vs_Objective.
+### Execution scripts
+Located in the execution/ directory.
 
+  * **Nominal_Model_Fitting** - The genetic algorithm is used to fit the model
+  to objective data created using the nominal parameters of the model. In short,
+  the ideal fit has an error is ~0 with all parameters set to 1.0.
+
+### Analysis scripts
+Located in the analysis/ directory.
+
+### Running the fitting
+The fitting executable requires 3 arguments:
+  * Objective file
+  * Protocol file
+  * Genetic algorithm settings file
+
+An example command to fit the model to nominal parameters is as follows:
 ```sh
 make && ./GA_Fitting objectives/Objective_GA_Protocol_Simulation.dat protocols/Protocol_DynClamp_Simulation.dat settings.ga
 ```
