@@ -1,12 +1,16 @@
 #!/bin/bash
-EXEC="../../GA_Fitting"
+EXEC=../../GA_Fitting
 OBJECTIVES=( \
-    "../../objectives/Objective_Cell_2.dat" \
-    "../../objectives/Objective_Cell_7.dat" \
+    ../../objectives/Objective_Cell_2.dat \
+    ../../objectives/Objective_Cell_7.dat \
     )
 PROTOCOLS=( \
-    "../../protocols/Protocol_Cell_2.dat" \
-    "../../protocols/Protocol_Cell_7.dat" \
+    ../../protocols/Protocol_Cell_2.dat \
+    ../../protocols/Protocol_Cell_7.dat \
+    )
+FOLDERNAME=( \
+    Cell_2 \
+    Cell_7 \
     )
 
 # Loop through objectives and protocols
@@ -41,8 +45,8 @@ for ((i = 0; i < ${#OBJECTIVES[@]}; i++)); do
     mv *.dat Constrained_Bounds
 
     # Move run data into another directory
-    if [ ! -d "Data/Run_$i" ]; then
-        mkdir -p Data/Run_$i
+    if [ ! -d "Data/${FOLDERNAME[i]}" ]; then
+        mkdir -p Data/${FOLDERNAME[i]}
     fi
-    mv Standard_Bounds Constrained_Bounds Data/Run_$i
+    mv Standard_Bounds Constrained_Bounds Data/${FOLDERNAME[i]}
 done
