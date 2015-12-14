@@ -40,16 +40,14 @@ experiments have been added to this repository as subtrees. If you wish to
 update the libraries, you must first add the remote repository and merge in any
 new changes.
 
-
-### Execution scripts
-Located in the execution/ directory.
-
-  * **Nominal_Model_Fitting** - The genetic algorithm is used to fit the model
-  to objective data created using the nominal parameters of the model. In short,
-  the ideal fit has an error is ~0 with all parameters set to 1.0.
-
-### Analysis scripts
+### Analysis and execution scripts
 Located in the analysis/ directory.
+  * **Nominal_Model_Fitting** - The genetic algorithm is used to fit the model
+    to objective data created using the nominal parameters of the model. In
+    short, the ideal fit has an error is ~0 with all parameters set to 1.0.
+  * **Simulation_vs_Objective** - A comparison is made between the full dynamic
+    clamp simulation and the simulation run during the GA individual
+    evaluations.
 
 ### Running the fitting
 The fitting executable requires 3 arguments:
