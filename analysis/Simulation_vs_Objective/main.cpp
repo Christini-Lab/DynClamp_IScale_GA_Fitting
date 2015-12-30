@@ -59,20 +59,21 @@ int main(int argc, char *argv[]) {
 
   LivRudy2009 model;
 
-  // Set parameters
+  // Scale model parameters
   model.setGKr(model.getGKr() * parameter[0]);
   model.setGKs(model.getGKs() * parameter[1]);
   model.setGCaL(model.getGCaL() * parameter[2]);
   model.setGK1(model.getGK1() * parameter[3]);
   model.setGCaT(model.getGCaT() * parameter[4]);
   model.setGNaK(model.getGNaK() * parameter[5]);
-  model.setGNCX(model.getGNCX() * parameter[6]);
-  model.setGNa(model.getGNa() * parameter[7]);
-  model.setGKp(model.getGKp() * parameter[8]);
-  model.setGpCa(model.getGpCa() * parameter[9]);
-  model.setGserca(model.getGserca() * parameter[10]);
+  model.setGNa(model.getGNa() * parameter[6]);
+  model.setGKp(model.getGKp() * parameter[7]);
+  model.setGpCa(model.getGpCa() * parameter[8]);
+  model.setGserca(model.getGserca() * parameter[9]);
+  model.setGNCX(model.getGNCX() * parameter[10]);
 
   // Data is acquired at 10 kHz
+  double dataDt = 0.1;
   model.setDt(dt);
   int steps = 0.1 / dt;
 
@@ -84,7 +85,7 @@ int main(int argc, char *argv[]) {
 
   std::vector< std::vector<double> >
       runData(protocols.size(),
-             std::vector<double>(protocols.at(0).size()));
+              std::vector<double>(protocols.at(0).size()));
 
   // Static pacing, using static pacing current
   // Conditions are saved, and model is set to those initial conditions before
@@ -153,7 +154,6 @@ int main(int argc, char *argv[]) {
 
     runData.at(i) = vmData;
   }
-
   // Output voltage data
   std::ofstream dataFile(argv[NUMPARAM + 3]);
   dataFile << std::setprecision(8);
