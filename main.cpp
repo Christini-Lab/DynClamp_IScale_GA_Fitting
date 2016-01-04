@@ -48,7 +48,7 @@ int main() {
   std::cout << "Starting simulation" << std::endl;
   double voltage;
   double stim = 0;
-  double dataDt = 0.01; // Dt of data output
+  double dataDt = 0.1; // Dt of data output
   double maxDt = model.getDt(); // Maximum dt for adaptive timestep
   double dt = model.getDt(); // Adaptive timestep
   double dVdt; // dVdt used to modify timestep
