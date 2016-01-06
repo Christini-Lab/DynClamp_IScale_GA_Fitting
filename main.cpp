@@ -11,12 +11,17 @@
 
 // Livshitz Rudy 2009 Model
 #include "lib/LivRudy2009/include/LivRudy2009.hpp"
+#include "lib/LivR_SteadyState_Prediction/LivR_SS_Prediction.hpp"
 
 // Global variables
 GlobalSetup *globalSetup;
 Random myRandom;
 std::vector< std::vector<double> > objectiveTraces; // Acquired at 10 kHz
 std::vector< std::vector<double> > protocolTraces; // Acquired at 10 kHz
+
+#define PROTOCOLDT 0.1 // (ms) Time step of protocol data
+#define MINDT 0.001 // (ms) minimum dt, 1000 kHz integration
+#define MAXDT 0.1 // (ms) maximum dt, 10kHz integration, should be <= PROTOCOLDT
 
 // Model simulation and objective evaluation
 void globalEvaluate(double *parameter, double *error,
@@ -47,11 +52,40 @@ void globalEvaluate(double *parameter, double *error,
   model.setGserca(model.getGserca() * parameter[9]);
   model.setGNCX(model.getGNCX() * parameter[10]);
 
-  // Data is acquired at 10 kHz
-  double dt = 0.1;
-  model.setDt(dt);
-  int steps = 0.1 / dt;
+  //Predict and set initial concentrations
+  LivR_SS_Prediction intialConcentrations;
+  model.setNai(
+      intialConcentrations.predict_Nai(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
+  model.setKi(
+      intialConcentrations.predict_Ki(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
+  model.setCai(
+      intialConcentrations.predict_Cai(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
+  model.setCaJSR(
+      intialConcentrations.predict_CaJSR(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
+  model.setCaNSR(
+      intialConcentrations.predict_CaNSR(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
 
+  double dt = MAXDT; // Adaptive timestep, starting at max
+  double dVdt; // dVdt is used to modify timestep
+  const double dVdtThresh = MAXDT * 2; // If dVdt is less than this, reduce dt
+  double v0 = model.getVm(); // Voltage of previous timestep to calculate dVdt
+  int steps = dt / PROTOCOLDT; // Number of integration steps
+  const int maxSteps = PROTOCOLDT / MINDT; // Max number of integration steps
   // Static pacing beats before each perturbation to elminate transients
   int numPrelimBeats = 25;
   int numPerturbBeats = 5;
@@ -68,13 +102,41 @@ void globalEvaluate(double *parameter, double *error,
   // each perturbation.
   for (int z = 0; z < numPrelimBeats; z++) {
     auto it = protocols.at(0).begin();
-    int cnt = 0;
     // Extract current from protocol and scale by cm each loop
     // Loop will exit if model crashes
-    while (it != protocols.at(0).end() && model.iClamp(*it / cm * -1)) {
-      cnt++;
-      if (cnt % steps == 0)
-        it++;
+    double v0 = model.getVm(); // Get initial voltage for dVdt evaluation
+
+    // Steps through each step of the protocol and inject current
+    while (it != protocols.at(0).end()) {
+      dVdt = std::abs(model.getVm() - v0) / PROTOCOLDT;
+      v0 = model.getVm();
+      // Adaptive dt calculation
+      // Voltage is changing less than threshold, so use max dt
+      if (dVdt < dVdtThresh) {
+        dt = MAXDT;
+        model.setDt(dt);
+        steps = PROTOCOLDT / dt;
+      }
+      else { // Voltage is changing quickly, so reduce dt up to minimum
+        steps = std::ceil(dVdt / dVdtThresh); // Round up to an integer
+
+        if (steps > maxSteps)
+          steps = maxSteps;
+
+        dt = PROTOCOLDT / steps;
+        model.setDt(dt);
+      }
+
+      int idx = 0;
+      // Integrate using adaptive dt, loop breaks if model crashes
+      while (idx < steps && model.iClamp(*it / cm * -1)) {
+        idx++;
+      }
+
+      if (model.getStatus())
+        it++; // Increment to next protocol step if model did not crash
+      else
+        break; // if model crashed, exit loop
     }
   }
 
@@ -89,13 +151,42 @@ void globalEvaluate(double *parameter, double *error,
     // First set of 5 beats are not recorded
     for (int z = 0; z < numPerturbBeats; z++) {
       auto it = protocols.at(i).begin();
-      int cnt = 0;
       // Extract current from protocol and scale by cm each loop
       // Loop will exit if model crashes
-      while (it != protocols.at(i).end() && model.iClamp(*it / cm * -1)) {
-        cnt++;
-        if (cnt % steps == 0)
-          it++;
+      double v0 = model.getVm(); // Get initial voltage for dVdt evaluation
+
+      // Steps through each step of the protocol and inject current
+      while (it != protocols.at(i).end()) {
+        dVdt = std::abs(model.getVm() - v0) / PROTOCOLDT;
+        v0 = model.getVm();
+
+        // Adaptive dt calculation
+        // Voltage is changing less than threshold, so use max dt
+        if (dVdt < dVdtThresh) {
+          dt = MAXDT;
+          model.setDt(dt);
+          steps = PROTOCOLDT / dt;
+        }
+        else { // Voltage is changing quickly, so reduce dt up to minimum
+          steps = std::ceil(dVdt / dVdtThresh); // Round up to an integer
+
+          if (steps > maxSteps)
+            steps = maxSteps;
+
+          dt = PROTOCOLDT / steps;
+          model.setDt(dt);
+        }
+        int idx = 0;
+
+        // Integrate using adaptive dt, loop breaks if model crashes
+        while (idx < steps && model.iClamp(*it / cm * -1)) {
+          idx++;
+        }
+
+        if (model.getStatus())
+          it++; // Increment to next protocol step if model did not crash
+        else
+          break; // if model crashed, exit loop
       }
     }
 
@@ -105,15 +196,46 @@ void globalEvaluate(double *parameter, double *error,
     for (int z = 0; z < numPerturbBeats; z++) {
       auto it = protocols.at(i).begin();
       auto ot = vmData.begin();
-      int cnt = 0;
-      while (it != protocols.at(i).end() && model.iClamp(*it / cm * -1)) {
-        if (cnt % steps == 0) {
-          // Running sum of the membrane voltage
-          *ot += model.getVm();
-          it++;
+      // Extract current from protocol and scale by cm each loop
+      // Loop will exit if model crashes
+      double v0 = model.getVm(); // Get initial voltage for dVdt evaluation
+
+      // Steps through each step of the protocol and inject current
+      while (it != protocols.at(i).end()) {
+        dVdt = std::abs(model.getVm() - v0) / PROTOCOLDT;
+        v0 = model.getVm();
+
+        // Adaptive dt calculation
+        // Voltage is changing less than threshold, so use max dt
+        if (dVdt < dVdtThresh) {
+          dt = MAXDT;
+          model.setDt(dt);
+          steps = PROTOCOLDT / dt;
+        }
+        else { // Voltage is changing quickly, so reduce dt up to minimum
+          steps = std::ceil(dVdt / dVdtThresh); // Round up to an integer
+
+          if (steps > maxSteps)
+            steps = maxSteps;
+
+          dt = PROTOCOLDT / steps;
+          model.setDt(dt);
+        }
+
+        int idx = 0;
+
+        // Integrate using adaptive dt, loop breaks if model crashes
+        while (idx < steps && model.iClamp(*it / cm * -1)) {
+          idx++;
+        }
+
+        if (model.getStatus()) {
+          *ot += model.getVm(); // Save running sum of voltage
+          it++; // Increment to next protocol step if model did not crash
           ot++;
         }
-        cnt++;
+        else
+          break; // if model crashed, exit loop
       }
     }
 
@@ -134,7 +256,7 @@ void globalEvaluate(double *parameter, double *error,
   }
     // If model crashed, set error to arbitrarily high value
     if (!model.getStatus()) {
-      error[0] = 200 * 5000 * 8;
+      error[0] = 400 * 5000 * 8;
     }
     else { // Perform normal error calculation
       // Calculate total error

@@ -6,12 +6,13 @@
 #include <iomanip>
 #include <iterator>
 
-#define NUMPARAM 11 // Number of scaling parameters
+#define NUMPARAM 13 // Number of scaling parameters
 #define PROTOCOLDT 0.1 // (ms) Time step of protocol data
 #define MINDT 0.001 // (ms) minimum dt, 1000 kHz integration
 
 // Livshitz Rudy 2009 Model
 #include "../../lib/LivRudy2009/include/LivRudy2009.hpp"
+#include "../../lib/LivR_SteadyState_Prediction/LivR_SS_Prediction.hpp"
 
 int main(int argc, char *argv[]) {
   // Arguments: Scaling parameters, dt, protocol file, voltage output file
@@ -62,17 +63,48 @@ int main(int argc, char *argv[]) {
   LivRudy2009 model;
 
   // Scale model parameters
-  model.setGKr(model.getGKr() * parameter[0]);
-  model.setGKs(model.getGKs() * parameter[1]);
+  // GNa, GNab, GCaL, GCaT, GCab, GK1, GKr, GKs, GKp, INaK, kNCX, GpCa, Gserca
+  model.setGNa(model.getGNa() * parameter[0]);
+  model.setGNab(model.getGNab() * parameter[1]);
   model.setGCaL(model.getGCaL() * parameter[2]);
-  model.setGK1(model.getGK1() * parameter[3]);
-  model.setGCaT(model.getGCaT() * parameter[4]);
-  model.setGNaK(model.getGNaK() * parameter[5]);
-  model.setGNa(model.getGNa() * parameter[6]);
-  model.setGKp(model.getGKp() * parameter[7]);
-  model.setGpCa(model.getGpCa() * parameter[8]);
-  model.setGserca(model.getGserca() * parameter[9]);
+  model.setGCaT(model.getGCaT() * parameter[3]);
+  model.setGCab(model.getGCab() * parameter[4]);
+  model.setGK1(model.getGK1() * parameter[5]);
+  model.setGKr(model.getGKr() * parameter[6]);
+  model.setGKs(model.getGKs() * parameter[7]);
+  model.setGKp(model.getGKp() * parameter[8]);
+  model.setGNaK(model.getGNaK() * parameter[9]);
   model.setGNCX(model.getGNCX() * parameter[10]);
+  model.setGpCa(model.getGpCa() * parameter[11]);
+  model.setGserca(model.getGserca() * parameter[12]);
+
+  // Predict and set initial concentrations
+  LivR_SS_Prediction intialConcentrations;
+  model.setNai(
+      intialConcentrations.predict_Nai(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
+  model.setKi(
+      intialConcentrations.predict_Ki(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
+  model.setCai(
+      intialConcentrations.predict_Cai(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
+  model.setCaJSR(
+      intialConcentrations.predict_CaJSR(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
+  model.setCaNSR(
+      intialConcentrations.predict_CaNSR(
+          parameter[0], parameter[1], parameter[2], parameter[3], parameter[4],
+          parameter[5], parameter[6], parameter[7], parameter[8], parameter[9],
+          parameter[10], parameter[11], parameter[12]));
 
   double dt = maxDt; // Adaptive timestep, starting at max
   double dVdt; // dVdt is used to modify timestep
@@ -127,7 +159,7 @@ int main(int argc, char *argv[]) {
       }
 
       if (model.getStatus())
-        it++;
+        it++; // Increment to next protocol step if model did not crash
       else
         break; // if model crashed, exit loop
     }
@@ -143,13 +175,13 @@ int main(int argc, char *argv[]) {
     // Current perturbation for 10 beats
     // First set of 5 beats are not recorded
     for (int z = 0; z < numPerturbBeats; z++) {
-      auto it = protocols.at(0).begin();
+      auto it = protocols.at(i).begin();
       // Extract current from protocol and scale by cm each loop
       // Loop will exit if model crashes
       double v0 = model.getVm(); // Get initial voltage for dVdt evaluation
 
       // Steps through each step of the protocol and inject current
-      while (it != protocols.at(0).end()) {
+      while (it != protocols.at(i).end()) {
         dVdt = std::abs(model.getVm() - v0) / PROTOCOLDT;
         v0 = model.getVm();
 
@@ -170,15 +202,14 @@ int main(int argc, char *argv[]) {
           model.setDt(dt);
         }
         int idx = 0;
-        model.setDt(0.01);steps=10;
+
         // Integrate using adaptive dt, loop breaks if model crashes
         while (idx < steps && model.iClamp(*it / cm * -1)) {
           idx++;
         }
-        it++; // Increment to next protocol step
 
         if (model.getStatus())
-          it++;
+          it++; // Increment to next protocol step if model did not crash
         else
           break; // if model crashed, exit loop
       }
@@ -188,14 +219,14 @@ int main(int argc, char *argv[]) {
     // Initialize vector for voltage summation
     std::vector<double> vmData(protocols.at(i).size(), 0.0);
     for (int z = 0; z < numPerturbBeats; z++) {
-      auto it = protocols.at(0).begin();
+      auto it = protocols.at(i).begin();
       auto ot = vmData.begin();
       // Extract current from protocol and scale by cm each loop
       // Loop will exit if model crashes
       double v0 = model.getVm(); // Get initial voltage for dVdt evaluation
 
       // Steps through each step of the protocol and inject current
-      while (it != protocols.at(0).end()) {
+      while (it != protocols.at(i).end()) {
         dVdt = std::abs(model.getVm() - v0) / PROTOCOLDT;
         v0 = model.getVm();
 
@@ -217,6 +248,7 @@ int main(int argc, char *argv[]) {
         }
 
         int idx = 0;
+
         // Integrate using adaptive dt, loop breaks if model crashes
         while (idx < steps && model.iClamp(*it / cm * -1)) {
           idx++;
@@ -224,7 +256,7 @@ int main(int argc, char *argv[]) {
 
         if (model.getStatus()) {
           *ot += model.getVm(); // Save running sum of voltage
-          it++;
+          it++; // Increment to next protocol step if model did not crash
           ot++;
         }
         else

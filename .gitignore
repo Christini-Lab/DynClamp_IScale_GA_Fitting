@@ -3,4 +3,4 @@
 GA_Fitting
 Model_Simulation
 .RData
-analysis/Simulation_vs_Objective/*.dat
+analysis/*/*.dat
