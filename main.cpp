@@ -40,17 +40,19 @@ void globalEvaluate(double *parameter, double *error,
   }
 
   // Scale model parameters
-  model.setGKr(model.getGKr() * parameter[0]);
-  model.setGKs(model.getGKs() * parameter[1]);
+  model.setGNa(model.getGNa() * parameter[0]);
+  model.setGNab(model.getGNab() * parameter[1]);
   model.setGCaL(model.getGCaL() * parameter[2]);
-  model.setGK1(model.getGK1() * parameter[3]);
-  model.setGCaT(model.getGCaT() * parameter[4]);
-  model.setGNaK(model.getGNaK() * parameter[5]);
-  model.setGNa(model.getGNa() * parameter[6]);
-  model.setGKp(model.getGKp() * parameter[7]);
-  model.setGpCa(model.getGpCa() * parameter[8]);
-  model.setGserca(model.getGserca() * parameter[9]);
+  model.setGCaT(model.getGCaT() * parameter[3]);
+  model.setGCab(model.getGCab() * parameter[4]);
+  model.setGK1(model.getGK1() * parameter[5]);
+  model.setGKr(model.getGKr() * parameter[6]);
+  model.setGKs(model.getGKs() * parameter[7]);
+  model.setGKp(model.getGKp() * parameter[8]);
+  model.setGNaK(model.getGNaK() * parameter[9]);
   model.setGNCX(model.getGNCX() * parameter[10]);
+  model.setGpCa(model.getGpCa() * parameter[11]);
+  model.setGserca(model.getGserca() * parameter[12]);
 
   //Predict and set initial concentrations
   LivR_SS_Prediction intialConcentrations;
