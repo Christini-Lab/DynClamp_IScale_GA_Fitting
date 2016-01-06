@@ -87,7 +87,7 @@ default
 #
 #  When using NSGA, it can be neither SUS nor RouletteWheel.
 #
-TournametWOR 4
+TournamentWOR 4
 
 #
 # Crossover
