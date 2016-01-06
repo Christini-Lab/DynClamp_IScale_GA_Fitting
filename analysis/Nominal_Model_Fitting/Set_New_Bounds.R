@@ -23,7 +23,7 @@ for (i in 2:(length(args))) {
 
 # Write GA settings file with new bounds
 line <- c("SGA",
-           "11")
+           "13")
 write(line, file = settings.filename)
 for (i in 1:dim(all.best)[2]) {
   line = paste(c("double",
