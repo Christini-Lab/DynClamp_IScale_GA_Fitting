@@ -63,7 +63,6 @@ int main(int argc, char *argv[]) {
   LivRudy2009 model;
 
   // Scale model parameters
-  // GNa, GNab, GCaL, GCaT, GCab, GK1, GKr, GKs, GKp, INaK, kNCX, GpCa, Gserca
   model.setGNa(model.getGNa() * parameter[0]);
   model.setGNab(model.getGNab() * parameter[1]);
   model.setGCaL(model.getGCaL() * parameter[2]);
