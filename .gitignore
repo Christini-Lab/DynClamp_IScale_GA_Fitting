@@ -4,3 +4,4 @@ GA_Fitting
 Model_Simulation
 .RData
 analysis/*/*.dat
+.depend
