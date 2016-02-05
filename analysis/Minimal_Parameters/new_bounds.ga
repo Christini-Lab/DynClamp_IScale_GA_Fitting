@@ -1,0 +1,29 @@
+SGA
+9
+double 1.496468 1.496468
+double 0.667141 0.667141
+double 0.111352 0.111352
+double 0.26186 0.26186
+double 0.26408 0.26408
+double 1.593962 1.593962
+double 2.921999 2.921999
+double 2.722517 2.722517
+double 1.550407 1.550407
+1
+Min
+0
+400
+200
+0.9
+default
+TournamentWOR 4
+default
+default
+default
+default
+default
+default
+default
+default
+default
+1 GA_Run.dat
