@@ -5,3 +5,4 @@ Model_Simulation
 .RData
 analysis/*/*.dat
 .depend
+*.log
