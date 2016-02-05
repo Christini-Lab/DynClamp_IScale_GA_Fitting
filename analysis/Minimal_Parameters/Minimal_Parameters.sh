@@ -9,7 +9,7 @@ SETTINGS="settings.ga"
 
 # Run GA 10 times with nominal bounds
 for ((z = 0; z < 5; z++)); do
-    echo $EXEC $OBJECTIVE $PROTOCOL $SETTINGS
+    $EXEC $OBJECTIVE $PROTOCOL $SETTINGS 1>> $FOLDERNAME.log
 done
 
 # Find new bounds based on last 10 Runs
@@ -25,17 +25,20 @@ SETTINGS="new_bounds.ga"
 
 # Run GA 5 times with new bounds
 for ((z = 0; z < 5; z++)); do
-    echo $EXEC $OBJECTIVE $PROTOCOL $SETTINGS
+    $EXEC $OBJECTIVE $PROTOCOL $SETTINGS 1>> $FOLDERNAME.log
 done
 
-# Move second set of 10 runs into another directory
+# Move second set of 5 runs into another directory
 if [ ! -d "Constrained_Bounds" ]; then
     mkdir Constrained_Bounds
 fi
 mv *.dat Constrained_Bounds
 
-# Move run data into another directory
+# Move all GA run data into data directory
 if [ ! -d "Data/$FOLDERNAME" ]; then
     mkdir -p Data/$FOLDERNAME
 fi
 mv Standard_Bounds Constrained_Bounds Data/$FOLDERNAME
+
+# Move settings file and log file into Data folder
+mv new_bounds.ga $FOLDERNAME.log Data/$FOLDERNAME
