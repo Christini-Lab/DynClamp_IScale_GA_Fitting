@@ -1,5 +1,5 @@
 #!/bin/bash
-EXEC=./Stochastic_GA_Fitting
+EXEC=./VClamp_GA_Fitting
 OBJECTIVE=Objective_Voltage_Clamp.dat
 PROTOCOL=Protocol_Voltage_Clamp.dat
 FOLDERNAME=Voltage_Clamp
