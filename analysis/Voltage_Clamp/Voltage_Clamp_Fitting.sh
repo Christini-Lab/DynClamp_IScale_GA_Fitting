@@ -1,8 +1,8 @@
 #!/bin/bash
 EXEC=./Stochastic_GA_Fitting
-OBJECTIVE=Objective_Stochastic_Pacing.dat
-PROTOCOL=Protocol_Stochastic_Pacing.dat
-FOLDERNAME=Stochastic_Pacing
+OBJECTIVE=Objective_Voltage_Clamp.dat
+PROTOCOL=Protocol_Voltage_Clamp.dat
+FOLDERNAME=Voltage_Clamp
 
 # Loop through objectives and protocols
 SETTINGS="settings.ga"
