@@ -19,7 +19,7 @@ Rscript Set_New_Bounds.R new_bounds.ga *.dat
 if [ ! -d "Standard_Bounds" ]; then
     mkdir Standard_Bounds
 fi
-mv *.dat Standard_Bounds
+mv *GA_Run.dat Standard_Bounds
 
 SETTINGS="new_bounds.ga"
 
@@ -32,7 +32,7 @@ done
 if [ ! -d "Constrained_Bounds" ]; then
     mkdir Constrained_Bounds
 fi
-mv *.dat Constrained_Bounds
+mv *GA_Run.dat Constrained_Bounds
 
 # Move all GA run data into data directory
 if [ ! -d "Data/$FOLDERNAME" ]; then
