@@ -142,7 +142,8 @@ void globalEvaluate(double *parameter, double *error,
   double totalError = 0;
 
   // Run each protocol
-  for (int i = 0; i < protocols.size(); i++) {
+  // Skip static pacing, i = 1 instead of 0
+  for (int i = 1; i < protocols.size(); i++) {
     // Set conditions to after static pacing beats
     model.setConditions(conditions);
 
@@ -260,7 +261,7 @@ void globalEvaluate(double *parameter, double *error,
   }
     // If model crashed, set error to arbitrarily high value
     if (!model.getStatus()) {
-      error[0] = 400 * 5000 + 400 * 50000;
+      error[0] = 400 * 50000;
     }
     else {
       error[0] = totalError;
