@@ -141,63 +141,11 @@ void globalEvaluate(double *parameter, double *error,
 
   double totalError = 0;
 
-  // Run each protocol
+  // Run voltage protocol
   // Skip static pacing, only voltage clamp error will be used for fitting
+  // dVdt changed to calculate dIdt
   for (int i = 1; i < protocols.size(); i++) {
-    // Set conditions to after static pacing beats
-    model.setConditions(conditions);
-
-    // Current perturbation for 10 beats
-    // First set of 5 beats are not recorded
-    for (int z = 0; z < numPerturbBeats; z++) {
-      auto it = protocols.at(i).begin();
-      // Extract current from protocol and scale by cm each loop
-      // Loop will exit if model crashes
-      double v0 = model.getVm(); // Get initial voltage for dVdt evaluation
-
-      // Steps through each step of the protocol and inject current
-      while (it != protocols.at(i).end()) {
-        dVdt = std::abs(model.getVm() - v0) / PROTOCOLDT;
-        v0 = model.getVm();
-
-        // Adaptive dt calculation
-        // Voltage is changing less than threshold, so use max dt
-        if (dVdt < dVdtThresh) {
-          dt = MAXDT;
-          model.setDt(dt);
-          steps = PROTOCOLDT / dt;
-        }
-        else { // Voltage is changing quickly, so reduce dt up to minimum
-          steps = std::ceil(dVdt / dVdtThresh); // Round up to an integer
-
-          if (steps > maxSteps)
-            steps = maxSteps;
-
-          dt = PROTOCOLDT / steps;
-          model.setDt(dt);
-        }
-        int idx = 0;
-
-        // Integrate using adaptive dt, loop breaks if model crashes
-        if (i == 0) { // Pacing
-          while (idx < steps && model.iClamp(*it / cm * -1)) {
-            idx++;
-          }
-        }
-        else { // Voltage Clamp
-          while (idx < steps && model.vClamp(*it)) {
-            idx++;
-          }
-        }
-
-        if (model.getStatus())
-          it++; // Increment to next protocol step if model did not crash
-        else
-          break; // if model crashed, exit loop
-      }
-    }
-
-    // Second set of 5 beats are summated
+    // Set of 5 runs are summated
     // Initialize vector for voltage summation
     std::vector<double> vmData(protocols.at(i).size(), 0.0);
     for (int z = 0; z < numPerturbBeats; z++) {
@@ -205,12 +153,12 @@ void globalEvaluate(double *parameter, double *error,
       auto ot = vmData.begin();
       // Extract current from protocol and scale by cm each loop
       // Loop will exit if model crashes
-      double v0 = model.getVm(); // Get initial voltage for dVdt evaluation
+      double v0 = model.getI(); // Get initial current for dVdt evaluation
 
       // Steps through each step of the protocol and inject current
       while (it != protocols.at(i).end()) {
-        dVdt = std::abs(model.getVm() - v0) / PROTOCOLDT;
-        v0 = model.getVm();
+        dVdt = std::abs(model.getI() - v0) / PROTOCOLDT;
+        v0 = model.getI();
 
         // Adaptive dt calculation
         // Voltage is changing less than threshold, so use max dt
@@ -232,22 +180,12 @@ void globalEvaluate(double *parameter, double *error,
         int idx = 0;
 
         // Integrate using adaptive dt, loop breaks if model crashes
-        if (i == 0) { // Pacing
-          while (idx < steps && model.iClamp(*it / cm * -1)) {
-            idx++;
-          }
-        }
-        else { // Voltage Clamp
-          while (idx < steps && model.vClamp(*it)) {
-            idx++;
-          }
+        while (idx < steps && model.vClamp(*it)) {
+          idx++;
         }
 
         if (model.getStatus()) {
-          if (i == 0)
-            *ot += model.getVm(); // Save running sum of voltage
-          else
-            *ot += model.getI(); // Save running sum of current
+          *ot += model.getI(); // Save running sum of current
           it++; // Increment to next protocol step if model did not crash
           ot++;
         }
