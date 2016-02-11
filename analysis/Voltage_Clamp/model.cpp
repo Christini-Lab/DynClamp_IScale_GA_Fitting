@@ -209,6 +209,10 @@ int main(int argc, char *argv[]) {
           }
         }
         else { // Voltage Clamp
+          // Dt is set to maxdt for voltage clamp at all times
+          dt = maxDt;
+          model.setDt(dt);
+          steps = PROTOCOLDT / dt;
           while (idx < steps && model.vClamp(*it)) {
             idx++;
           }
@@ -262,6 +266,10 @@ int main(int argc, char *argv[]) {
           }
         }
         else { // Voltage Clamp
+          // Dt is set to maxdt for voltage clamp at all times
+          dt = maxDt;
+          model.setDt(dt);
+          steps = PROTOCOLDT / dt;
           while (idx < steps && model.vClamp(*it)) {
             idx++;
           }
