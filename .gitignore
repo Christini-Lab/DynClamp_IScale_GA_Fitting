@@ -1,5 +1,6 @@
 /*.dat
 *.o
+Minimal_GA_Fitting
 GA_Fitting
 Model_Simulation
 .RData
