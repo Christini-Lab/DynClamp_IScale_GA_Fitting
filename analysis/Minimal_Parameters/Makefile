@@ -13,13 +13,14 @@ MODEL_OBJFILES := $(patsubst %.cpp,%.o,$(wildcard $(MODEL_SRC_DIR)*.cpp))
 PREDICT_SRC_DIR = ../../lib/LivR_SteadyState_Prediction/
 
 SRCFILES = $(GA_SRCFILES) $(MODEL_SRCFILES) \
-	$(PREDICT_SRC_DIR)/LivR_SS_Prediction.cpp main.cpp
+	$(PREDICT_SRC_DIR)/LivR_SS_Prediction.cpp main.cpp minp2.cpp
 OBJFILES = $(GA_OBJFILES) $(MODEL_OBJFILES) \
 	$(PREDICT_SRC_DIR)/LivR_SS_Prediction.o
 
 EXEC = Minimal_GA_Fitting
+EXEC2 = MinimalP2_GA_Fitting
 
-all: $(EXEC)
+all: $(EXEC) $(EXEC2)
 .PHONY: all clean
 
 # Automatically determine dependencies of source files
@@ -29,6 +30,9 @@ depend: .depend
 -include .depend
 
 $(EXEC): $(OBJFILES) main.cpp
+	$(CXX) $(CXXFLAGS) $(LFLAGS) -o $@ $^ $(LIBS)
+
+$(EXEC2): $(OBJFILES) minp2.cpp
 	$(CXX) $(CXXFLAGS) $(LFLAGS) -o $@ $^ $(LIBS)
 
 clean:
