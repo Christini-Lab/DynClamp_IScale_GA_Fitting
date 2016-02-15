@@ -13,7 +13,7 @@ for ((z = 0; z < 5; z++)); do
 done
 
 # Find new bounds based on last 10 Runs
-Rscript Set_New_Bounds.R new_bounds.ga *.dat
+Rscript Set_New_Bounds.R new_bounds.ga *GA_Run.dat
 
 # Move first 5 runs into another directory
 if [ ! -d "Standard_Bounds" ]; then
