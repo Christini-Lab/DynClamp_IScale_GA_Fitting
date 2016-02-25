@@ -1,6 +1,8 @@
 /*.dat
 *.o
 Minimal_GA_Fitting
+VClamp_GA_Fitting
+No_Background_GA_Fitting
 GA_Fitting
 Model_Simulation
 .RData

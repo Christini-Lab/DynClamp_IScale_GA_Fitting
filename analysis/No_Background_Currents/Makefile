@@ -17,9 +17,9 @@ SRCFILES = $(GA_SRCFILES) $(MODEL_SRCFILES) \
 OBJFILES = $(GA_OBJFILES) $(MODEL_OBJFILES) \
 	$(PREDICT_SRC_DIR)/LivR_SS_Prediction.o
 
-EXEC = Minimal_GA_Fitting
+EXEC = No_Background_GA_Fitting
 
-all: $(EXEC)
+all: $(EXEC) $(EXEC2)
 .PHONY: all clean
 
 # Automatically determine dependencies of source files
