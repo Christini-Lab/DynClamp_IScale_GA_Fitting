@@ -11,13 +11,15 @@ SGA
 #
 # Number of decision variables
 #
-11
+13
 
 #
 # For each decision variable, enter:
 # 	decision variable type, Lower bound, Upper bound
 # Decision variable type can be double or int
 #
+double 0.001 3.0
+double 0.001 3.0
 double 0.001 3.0
 double 0.001 3.0
 double 0.001 3.0
