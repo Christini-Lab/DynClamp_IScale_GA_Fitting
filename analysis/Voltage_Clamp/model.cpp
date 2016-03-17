@@ -316,5 +316,5 @@ int main(int argc, char *argv[]) {
     dataFile << std::endl;
   }
 
-  return 1;
+  return EXIT_SUCCESS;
 }
