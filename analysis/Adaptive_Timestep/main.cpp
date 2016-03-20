@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
   int steps = dt / PROTOCOLDT; // Number of integration steps
   const int maxSteps = PROTOCOLDT / MINDT; // Max number of integration steps
   // Static pacing beats before each perturbation to elminate transients
-  int numPrelimBeats = 25;
+  int numPrelimBeats = 1000;
   int numPerturbBeats = 5;
   double cm = protocols.back().at(0) * 1e-12;
   protocols.resize(protocols.size() - 1); // Remove cm once extracted
