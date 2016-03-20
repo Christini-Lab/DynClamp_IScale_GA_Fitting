@@ -15,8 +15,9 @@
 #include "../../lib/LivR_SteadyState_Prediction/LivR_SS_Prediction.hpp"
 
 int main(int argc, char *argv[]) {
-  // Arguments: Scaling parameters, dt, protocol file, voltage output file
-  if (argc != (NUMPARAM + 4)) {
+  // Arguments: Scaling parameters, dt, objective, protocol file, voltage output
+  // file, error output file
+  if (argc != (NUMPARAM + 6)) {
     std::cout << "Error: invalid number of arguments: " << argc <<
         " instead of " << NUMPARAM + 4 << std::endl;
     exit(EXIT_FAILURE);
@@ -41,10 +42,29 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  // Retrieve protocol
+  // Retrieve objectives
   std::string line;
+  std::vector< std::vector<double> > objectives; // Acquired at 10 kHz
+  std::ifstream objFile(argv[NUMPARAM + 2]);
+  if (!objFile.good()) {
+    std::cout << "Error: unable to open objectives file" << std::endl;
+    exit(1);
+  }
+  while (std::getline(objFile, line, '\n')) {
+    std::vector<double> lineData;
+    std::stringstream lineStream(line);
+    double value;
+
+    while (lineStream >> value)
+      lineData.push_back(value);
+
+    objectives.push_back(lineData);
+  }
+
+
+  // Retrieve protocol
   std::vector< std::vector<double> > protocols; // Acquired at 10 kHz
-  std::ifstream proFile(argv[NUMPARAM + 2]);
+  std::ifstream proFile(argv[NUMPARAM + 3]);
   if (!proFile.good()) {
     std::cout << "Error: unable to open protocol file" << std::endl;
     exit(1);
@@ -61,6 +81,7 @@ int main(int argc, char *argv[]) {
   }
 
   LivRudy2009 model;
+  double totalError = 0;
 
   // Scale model parameters
   model.setGNa(model.getGNa() * parameter[0]);
@@ -120,6 +141,11 @@ int main(int argc, char *argv[]) {
   std::vector< std::vector<double> >
       runData(protocols.size(),
               std::vector<double>(protocols.at(0).size()));
+
+  // Vector for voltage differences between simulation and objective
+  std::vector< std::vector<double> >
+      vmDiff(protocols.size(),
+             std::vector<double>(protocols.at(0).size()));
 
   // Static pacing, using static pacing current
   // Conditions are saved, and model is set to those initial conditions before
@@ -274,6 +300,26 @@ int main(int argc, char *argv[]) {
                      return sumVm / numPerturbBeats;
                    });
 
+    // Calculate difference between average voltage and objective and
+    // save to vmDiff vector.
+    std::transform(vmData.begin(), vmData.end(),
+                   objectives.at(i).begin(),
+                   vmDiff.at(i).begin(),
+                   [] (double modelVm, double objectiveVm) {
+                     return std::abs(modelVm - objectiveVm);
+                   });
+
+
+    // Calculate total error
+    std::for_each(vmDiff.begin(), vmDiff.end(),
+                  // Summate differences between simulation and objective
+                  // and add to total error
+                  [&totalError] (std::vector<double> simVsObj) {
+                    totalError += std::accumulate(simVsObj.begin(),
+                                                  simVsObj.end(),
+                                                  0.0);
+                  });
+
     std::cout << "Vm Data: " <<
         "Max: " << *std::max_element(vmData.begin(), vmData.end()) <<
         " | Min: " << *std::min_element(vmData.begin(), vmData.end()) <<
@@ -283,7 +329,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Output voltage data
-  std::ofstream dataFile(argv[NUMPARAM + 3]);
+  std::ofstream dataFile(argv[NUMPARAM + 4]);
   dataFile << std::setprecision(8);
   for (auto it = runData.begin(); it != runData.end(); it++) {
     std::copy((*it).begin(), (*it).end(),
@@ -291,5 +337,10 @@ int main(int argc, char *argv[]) {
     dataFile << std::endl;
   }
 
-  return 1;
+  std::cout << "Error: " << totalError << std::endl;
+  std::ofstream errorFile(argv[NUMPARAM + 5]);
+  errorFile << std::setprecision(8);
+  errorFile << totalError;
+
+  return EXIT_SUCCESS;
 }
