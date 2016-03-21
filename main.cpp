@@ -304,7 +304,7 @@ int main(int argc, char *argv[]) {
   std::ifstream objFile(argv[1]);
   if (!objFile.good()) {
     std::cout << "Error: unable to open objective file" << std::endl;
-    exit(1);
+    return EXIT_FAILURE;
   }
   while (std::getline(objFile, line, '\n')) {
     std::vector<double> lineData;
@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
   std::ifstream proFile(argv[2]);
   if (!proFile.good()) {
     std::cout << "Error: unable to open protocol file" << std::endl;
-    exit(1);
+    return EXIT_FAILURE;
   }
   while (std::getline(proFile, line, '\n')) {
     std::vector<double> lineData;
@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
         "Protocol file: " << argv[1] << std::endl <<
         "Objective size: " << objectiveTraces.size() << std::endl <<
         "Objective file: " << argv[2] << std::endl;
-    exit(0);
+    return EXIT_FAILURE;
   }
   run_GA(argv[3]);
 

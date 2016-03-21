@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   if (argc != (NUMPARAM + 4)) {
     std::cout << "Error: invalid number of arguments: " << argc <<
         " instead of " << NUMPARAM + 4 << std::endl;
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
   // Retrieve parameter scalings from command line arguments
   std::vector<double> parameter(NUMPARAM);
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     if (!(ss >> parameter.at(i))) {
       std::cout << "Error: invalid parameter argument, must be a number" <<
           std::endl;
-      exit(EXIT_FAILURE);
+      return EXIT_FAILURE;
     }
   }
 
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
   if (!(dt_ss >> maxDt)) {
     std::cout << "Error: invalid dt, must be a number" <<
         std::endl;
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
   // Retrieve protocol
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
   std::ifstream proFile(argv[NUMPARAM + 2]);
   if (!proFile.good()) {
     std::cout << "Error: unable to open protocol file" << std::endl;
-    exit(1);
+    return EXIT_FAILURE;
   }
   while (std::getline(proFile, line, '\n')) {
     std::vector<double> lineData;
