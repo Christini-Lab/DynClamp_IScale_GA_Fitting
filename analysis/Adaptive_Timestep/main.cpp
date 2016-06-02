@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   // file, error output file
   if (argc != (NUMPARAM + 6)) {
     std::cout << "Error: invalid number of arguments: " << argc <<
-        " instead of " << NUMPARAM + 4 << std::endl;
+        " instead of " << NUMPARAM + 6 << std::endl;
     exit(EXIT_FAILURE);
   }
   // Retrieve parameter scalings from command line arguments
