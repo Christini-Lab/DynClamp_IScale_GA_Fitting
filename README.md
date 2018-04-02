@@ -6,6 +6,9 @@ perturbations are used to fit the behavior of the Livshitz Rudy 2009 ventricular
 model. Contains experimental data from 14 cells (Cell_1 - Cell_14) as well as
 the Livshitz Rudy 2009 model itself (Cell_15).
 
+References:
+  * Devenyi, Ryan A., et al. "Differential roles of two delayed rectifier potassium currents in regulation of ventricular action potential duration and arrhythmia susceptibility." The Journal of physiology 595.7 (2017): 2301-2317.
+  * Livshitz, Leonid, and Yoram Rudy. "Uniqueness and stability of action potential models during rest, pacing, and conduction using problem-solving environment." Biophysical journal 97.5 (2009): 1265-1276.
 
 ### Protocol files
 These files contain the cell membrane capacitance and injected current of the
